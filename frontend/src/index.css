@@ -55,6 +55,12 @@
     text-rendering: optimizeLegibility;
   }
 
+  /* Fondo oscuro y desenfocado detrás de los modales nativos abiertos. */
+  dialog::backdrop {
+    background-color: rgba(20, 33, 61, 0.55);
+    backdrop-filter: blur(3px);
+  }
+
   /* Selección de texto con el mismo acento índigo de la interfaz. */
   ::selection {
     background-color: rgba(79, 70, 229, 0.2);

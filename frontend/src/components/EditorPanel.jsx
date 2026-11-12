@@ -2,11 +2,12 @@
  * Panel de entrada de texto.
  *
  * Adapta el placeholder y los botones según la herramienta seleccionada:
- * Atbash muestra Cifrar/Descifrar y los hashes muestran Generar hash. También
- * aplica el límite de longitud y el atajo Ctrl/Cmd+Enter.
+ * Atbash muestra Cifrar/Descifrar y los hashes muestran Comparar/Generar hash.
+ * También aplica el límite de longitud y el atajo Ctrl/Cmd+Enter.
  */
 
 import {
+  ArrowLeftRight,
   Eraser,
   FileText,
   Hash,
@@ -15,16 +16,13 @@ import {
   Sparkles,
   UnlockKeyhole,
 } from 'lucide-react'
+import { MAX_TEXT_LENGTH } from '../lib/text'
 import {
   buttonPrimary,
   buttonSecondary,
   focusRingInput,
   panel,
 } from '../lib/ui'
-
-// Debe coincidir con MAX_TEXT_LENGTH del backend para que el textarea y la
-// validación del servidor rechacen los mismos textos demasiado largos.
-const MAX_LENGTH = 100000
 
 /**
  * @param {{
@@ -36,6 +34,7 @@ const MAX_LENGTH = 100000
  *   onEncrypt: () => void,
  *   onDecrypt: () => void,
  *   onHash: () => void,
+ *   onCompare: () => void,
  *   loading: boolean,
  * }} props
  */
@@ -48,6 +47,7 @@ export default function EditorPanel({
   onEncrypt,
   onDecrypt,
   onHash,
+  onCompare,
   loading,
 }) {
   const isCipher = tool.kind === 'cipher'
@@ -121,7 +121,7 @@ export default function EditorPanel({
           value={text}
           onChange={(event) => onTextChange(event.target.value)}
           onKeyDown={handleKeyDown}
-          maxLength={MAX_LENGTH}
+          maxLength={MAX_TEXT_LENGTH}
           rows={12}
           spellCheck={false}
           placeholder={tool.placeholder}
@@ -166,19 +166,31 @@ export default function EditorPanel({
             </button>
           </>
         ) : (
-          <button
-            type="button"
-            onClick={onHash}
-            disabled={disabled}
-            className={`${buttonPrimary} px-4 py-2.5 text-sm`}
-          >
-            {loading ? (
-              <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-            ) : (
-              <Hash className="size-4" aria-hidden="true" />
-            )}
-            Generar hash
-          </button>
+          <>
+            {/* El comparador tiene su propio campo dentro del modal, por eso
+                sigue disponible aunque el editor esté vacío. */}
+            <button
+              type="button"
+              onClick={onCompare}
+              className={`${buttonSecondary} px-4 py-2.5 text-sm`}
+            >
+              <ArrowLeftRight className="size-4" aria-hidden="true" />
+              Comparar
+            </button>
+            <button
+              type="button"
+              onClick={onHash}
+              disabled={disabled}
+              className={`${buttonPrimary} px-4 py-2.5 text-sm`}
+            >
+              {loading ? (
+                <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+              ) : (
+                <Hash className="size-4" aria-hidden="true" />
+              )}
+              Generar hash
+            </button>
+          </>
         )}
       </footer>
     </section>

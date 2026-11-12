@@ -1,6 +1,6 @@
 # CifraLab
 
-Aplicación web para **cifrar y descifrar con Atbash** y **generar hashes SHA-256 y SHA-512**, con historial independiente por algoritmo. Interfaz React en español con diseño responsive, estados de carga, copiado al portapapeles y validaciones claras.
+Aplicación web para **cifrar y descifrar con Atbash** y **generar hashes SHA-256 y SHA-512**, con historial independiente por algoritmo y un comparador SHA-256/SHA-512 en modal. Interfaz React en español con diseño responsive, estados de carga, copiado al portapapeles y validaciones claras.
 
 ## Stack
 
@@ -25,6 +25,7 @@ Cifrado/
 │   └── src/
 │       ├── api/client.js        # Cliente HTTP
 │       ├── components/          # UI
+│       ├── lib/text.js          # Saneamiento y límite de texto
 │       ├── lib/tools.js         # Definición de herramientas
 │       └── App.jsx
 └── README.md
@@ -107,5 +108,6 @@ npm run build
 
 - **Atbash es simétrico:** cifrar y descifrar aplican la misma sustitución. Trabaja con 26 letras (`A-Z`, sin `Ñ`), convierte la entrada a mayúsculas y rechaza espacios, números, signos y acentos.
 - **SHA-256/512 son unidireccionales:** no se pueden descifrar. La interfaz permite generar hashes y guarda un historial independiente por algoritmo durante la sesión, con texto original, hash completo y hora de generación. Los textos de hash solo aceptan letras `A-Z`, sin espacios, números, `Ñ`, acentos ni signos.
+- **Comparador SHA:** el botón «Comparar» abre un modal con su propio campo de texto. Al generar, calcula SHA-256 y SHA-512 en paralelo y muestra ambos hashes uno al lado del otro, sin verificar coincidencias ni guardar historial adicional.
 - **Privacidad:** todo se procesa en memoria; no hay base de datos ni registro del texto.
 - **Accesibilidad:** etiquetas asociadas, `aria-live` para resultados, `role="alert"` para errores, foco visible y contraste alto.

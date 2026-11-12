@@ -8,6 +8,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { ServerCrash } from 'lucide-react'
+import CompareHashModal from './components/CompareHashModal'
 import EditorPanel from './components/EditorPanel'
 import Footer from './components/Footer'
 import Header from './components/Header'
@@ -15,33 +16,8 @@ import HistoryPanel from './components/HistoryPanel'
 import ResultPanel from './components/ResultPanel'
 import ToolSelector from './components/ToolSelector'
 import { atbashText, checkHealth, hashText } from './api/client'
+import { sanitizeAtbash, sanitizeHashText } from './lib/text'
 import { TOOL_MAP } from './lib/tools'
-
-// Los servicios solo aceptan letras ASCII. Se elimina cualquier otro carácter
-// mientras el usuario escribe para que la API no reciba entradas inválidas.
-const NON_LETTERS = /[^A-Za-z]/g
-
-/**
- * Sanea el texto de Atbash: quita caracteres no alfabéticos y normaliza a
- * mayúsculas, que es el formato que devuelve el backend.
- *
- * @param {string} value Texto escrito por el usuario.
- * @returns {string} Texto con solo letras A-Z.
- */
-function sanitizeAtbash(value) {
-  return value.replace(NON_LETTERS, '').toUpperCase()
-}
-
-/**
- * Sanea el texto para hashing. Se conserva la capitalización original porque
- * mayúsculas y minúsculas producen hashes distintos.
- *
- * @param {string} value Texto escrito por el usuario.
- * @returns {string} Texto con solo letras A-Z/a-z.
- */
-function sanitizeHashText(value) {
-  return value.replace(NON_LETTERS, '')
-}
 
 /**
  * Genera un identificador único para una entrada del historial.
@@ -80,6 +56,8 @@ export default function App() {
   const [histories, setHistories] = useState({ sha256: [], sha512: [] })
   // checking | online | offline; se refleja en el indicador del header.
   const [apiStatus, setApiStatus] = useState('checking')
+  // Controla el modal que genera SHA-256 y SHA-512 para el mismo texto.
+  const [compareOpen, setCompareOpen] = useState(false)
 
   // Timer del feedback de copiado. Se guarda en una ref para poder cancelarlo
   // al desmontar o al copiar otro valor antes de que termine.
@@ -320,6 +298,7 @@ export default function App() {
             onEncrypt={() => runAtbash('encrypt')}
             onDecrypt={() => runAtbash('decrypt')}
             onHash={runHash}
+            onCompare={() => setCompareOpen(true)}
             loading={loading}
           />
 
@@ -350,6 +329,15 @@ export default function App() {
       </main>
 
       <Footer />
+
+      {/* El comparador se monta solo al abrirse: así inicializa su campo con el
+          texto actual del editor y descarta cualquier estado anterior. */}
+      {compareOpen && (
+        <CompareHashModal
+          initialText={text}
+          onClose={() => setCompareOpen(false)}
+        />
+      )}
     </div>
   )
 }
