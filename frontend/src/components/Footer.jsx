@@ -1,3 +1,7 @@
+/**
+ * Pie de página estático con el stack y el propósito de la aplicación.
+ * No recibe props ni mantiene estado.
+ */
 export default function Footer() {
   return (
     <footer className="border-t border-line bg-cream-light">

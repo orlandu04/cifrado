@@ -1,4 +1,7 @@
+# API y servidor ASGI.
 fastapi==0.162.2
 uvicorn[standard]==0.54.0
+
+# Pruebas de integración con TestClient.
 pytest==9.2.0
 httpx==0.28.1

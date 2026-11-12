@@ -1,3 +1,11 @@
+/**
+ * Panel de resultados.
+ *
+ * Presenta el resultado de Atbash o el hash generado, además de los estados de
+ * carga, error y vacío. El contenido cambia de formato según la herramienta:
+ * texto con saltos de línea para Atbash y monoespaciado con cortes para hashes.
+ */
+
 import {
   AlertTriangle,
   Check,
@@ -8,6 +16,18 @@ import {
 } from 'lucide-react'
 import { buttonSecondary, focusRing, panel } from '../lib/ui'
 
+/**
+ * @param {{
+ *   tool: object,
+ *   mode: 'encrypt' | 'decrypt',
+ *   result: string,
+ *   loading: boolean,
+ *   error: string,
+ *   copied: boolean,
+ *   onCopy: () => void,
+ *   onUseAsInput: () => void,
+ * }} props
+ */
 export default function ResultPanel({
   tool,
   mode,
@@ -19,6 +39,9 @@ export default function ResultPanel({
   onUseAsInput,
 }) {
   const isCipher = tool.kind === 'cipher'
+
+  // El modo de Atbash solo afecta al título: cifrar y descifrar comparten
+  // exactamente la misma transformación.
   const title = isCipher
     ? mode === 'decrypt'
       ? 'Texto descifrado'
@@ -43,6 +66,9 @@ export default function ResultPanel({
               {title}
             </h2>
           </div>
+
+          {/* La etiqueta identifica el algoritmo activo; los hashes añaden
+              además su tamaño en bits. */}
           <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
             <span className="rounded-full bg-accent-soft px-2.5 py-0.5 font-semibold text-accent">
               {tool.name}
@@ -56,6 +82,8 @@ export default function ResultPanel({
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Solo tiene sentido reutilizar un resultado de Atbash; un hash no
+              se puede volver a procesar como entrada del mismo modo. */}
           {isCipher && result && !loading && (
             <button
               type="button"
@@ -67,6 +95,8 @@ export default function ResultPanel({
             </button>
           )}
 
+          {/* El botón cambia a "Copiado" durante 2 segundos. Se deshabilita
+              mientras no hay resultado o hay una petición en curso. */}
           <button
             type="button"
             onClick={onCopy}
@@ -88,6 +118,7 @@ export default function ResultPanel({
       </header>
 
       <div className="flex flex-1 flex-col px-5 py-4">
+        {/* Los errores de red o validación se muestran antes del contenido. */}
         {error && (
           <div
             role="alert"
@@ -101,6 +132,8 @@ export default function ResultPanel({
           </div>
         )}
 
+        {/* aria-live anuncia cambios de resultado, carga o error sin mover el
+            foco del usuario. */}
         <div aria-live="polite" aria-atomic="true" className="flex-1">
           {loading ? (
             <div className="flex min-h-44 flex-col items-center justify-center gap-3 text-sm text-muted">
@@ -112,12 +145,16 @@ export default function ResultPanel({
             </div>
           ) : result ? (
             isCipher ? (
+              // Atbash puede producir textos largos: se conservan los saltos
+              // de línea y se permite desplazamiento vertical.
               <div className="scrollbar-thin max-h-96 overflow-y-auto rounded-xl border border-line bg-white p-4">
                 <p className="whitespace-pre-wrap break-words text-sm leading-relaxed text-navy">
                   {result}
                 </p>
               </div>
             ) : (
+              // Los hashes son cadenas largas sin espacios; break-all evita
+              // que desborden el panel y el monoespaciado facilita leerlos.
               <div className="rounded-xl border border-line bg-white p-4">
                 <p className="break-all font-mono text-[13px] leading-relaxed text-navy">
                   {result}
@@ -133,6 +170,7 @@ export default function ResultPanel({
               </div>
             )
           ) : (
+            // Estado inicial: explica qué hacer sin mostrar un espacio vacío.
             <div className="flex min-h-44 flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-line bg-white/60 px-6 py-10 text-center">
               <Fingerprint className="size-8 text-steel" aria-hidden="true" />
               <div>

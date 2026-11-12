@@ -1,10 +1,16 @@
-"""Funciones hash SHA-256 y SHA-512."""
+"""Funciones de hashing SHA-256 y SHA-512.
+
+Se usa ``hashlib`` de la biblioteca estándar para evitar implementaciones
+propias de criptografía. El texto se codifica siempre en UTF-8, aunque los
+schemas limitan la entrada a letras ASCII.
+"""
 
 from __future__ import annotations
 
 import hashlib
-import hmac
 
+# Tamaño en bits de cada algoritmo soportado. El diccionario actúa también
+# como lista blanca para ``hash_bits``.
 ALGORITHMS: dict[str, int] = {
     "sha256": 256,
     "sha512": 512,
@@ -12,6 +18,11 @@ ALGORITHMS: dict[str, int] = {
 
 
 def _build_hash(algorithm: str):
+    """Crea una instancia de hashlib para ``algorithm``.
+
+    El schema ya restringe los algoritmos válidos. La comprobación con
+    ``getattr`` protege a los llamadores internos que no pasen por Pydantic.
+    """
     try:
         constructor = getattr(hashlib, algorithm)
     except AttributeError as exc:  # pragma: no cover - protegido por el schema
@@ -22,19 +33,17 @@ def _build_hash(algorithm: str):
 def generate_hash(text: str, algorithm: str) -> str:
     """Calcula el hash hexadecimal de ``text`` con el algoritmo indicado."""
     digest = _build_hash(algorithm)
+    # UTF-8 convierte el texto en una secuencia de bytes estable y reproducible.
     digest.update(text.encode("utf-8"))
     return digest.hexdigest()
 
 
-def verify_hash(text: str, algorithm: str, expected_hash: str) -> tuple[bool, str]:
-    """Compara el hash calculado con ``expected_hash`` en tiempo constante."""
-    computed = generate_hash(text, algorithm)
-    normalized = "".join(expected_hash.split()).lower()
-    return hmac.compare_digest(computed, normalized), computed
-
-
 def hash_bits(algorithm: str) -> int:
-    """Devuelve el tamaño en bits del algoritmo indicado."""
+    """Devuelve el tamaño en bits del algoritmo indicado.
+
+    Raises:
+        ValueError: Si el algoritmo no está en ``ALGORITHMS``.
+    """
     if algorithm not in ALGORITHMS:
         raise ValueError(f"Algoritmo no soportado: {algorithm}")
     return ALGORITHMS[algorithm]

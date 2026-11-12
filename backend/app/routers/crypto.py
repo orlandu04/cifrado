@@ -1,4 +1,9 @@
-"""Endpoints de cifrado, hashing y verificación."""
+"""Endpoints de cifrado Atbash y generación de hashes.
+
+El router se monta bajo ``/api`` desde ``app.main``. Cada endpoint delega la
+lógica de negocio en ``app.services`` y se limita a traducir los modelos de
+entrada/salida de Pydantic.
+"""
 
 from __future__ import annotations
 
@@ -7,15 +12,11 @@ from fastapi import APIRouter, HTTPException
 from app.schemas import (
     AtbashRequest,
     AtbashResponse,
-    HashBothRequest,
-    HashBothResponse,
     HashRequest,
     HashResponse,
-    VerifyRequest,
-    VerifyResponse,
 )
 from app.services.atbash import AtbashError, atbash
-from app.services.hashing import generate_hash, hash_bits, verify_hash
+from app.services.hashing import generate_hash, hash_bits
 
 router = APIRouter(tags=["criptografía"])
 
@@ -26,9 +27,16 @@ router = APIRouter(tags=["criptografía"])
     summary="Cifrar o descifrar con Atbash",
 )
 def atbash_endpoint(payload: AtbashRequest) -> AtbashResponse:
+    """Aplica Atbash al texto validado.
+
+    Atbash es simétrico, por lo que ``mode`` no cambia el resultado; el campo
+    existe para que la interfaz pueda describir la acción realizada.
+    """
     try:
         result = atbash(payload.text)
     except AtbashError as exc:
+        # El servicio también valida caracteres. Se convierte el error de
+        # dominio en una respuesta HTTP 422 con un mensaje legible.
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     return AtbashResponse(result=result)
 
@@ -39,40 +47,13 @@ def atbash_endpoint(payload: AtbashRequest) -> AtbashResponse:
     summary="Generar un hash SHA-256 o SHA-512",
 )
 def hash_endpoint(payload: HashRequest) -> HashResponse:
+    """Calcula el hash del texto con el algoritmo solicitado.
+
+    ``generate_hash`` devuelve el digest en hexadecimal y ``hash_bits`` aporta
+    el tamaño del algoritmo para que el frontend pueda mostrarlo.
+    """
     return HashResponse(
         algorithm=payload.algorithm,
         hash=generate_hash(payload.text, payload.algorithm),
         bits=hash_bits(payload.algorithm),
     )
-
-
-@router.post(
-    "/hash/both",
-    response_model=HashBothResponse,
-    summary="Generar los hashes SHA-256 y SHA-512 del mismo texto",
-)
-def hash_both_endpoint(payload: HashBothRequest) -> HashBothResponse:
-    return HashBothResponse(
-        sha256=HashResponse(
-            algorithm="sha256",
-            hash=generate_hash(payload.text, "sha256"),
-            bits=hash_bits("sha256"),
-        ),
-        sha512=HashResponse(
-            algorithm="sha512",
-            hash=generate_hash(payload.text, "sha512"),
-            bits=hash_bits("sha512"),
-        ),
-    )
-
-
-@router.post(
-    "/verify",
-    response_model=VerifyResponse,
-    summary="Verificar un texto contra un hash",
-)
-def verify_endpoint(payload: VerifyRequest) -> VerifyResponse:
-    matches, computed = verify_hash(
-        payload.text, payload.algorithm, payload.expected_hash
-    )
-    return VerifyResponse(match=matches, computed_hash=computed)

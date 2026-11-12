@@ -1,7 +1,21 @@
+/**
+ * Historial de hashes de la sesión.
+ *
+ * Recibe únicamente las entradas del algoritmo activo, de modo que SHA-256 y
+ * SHA-512 nunca se mezclan. El historial vive en memoria: al recargar la
+ * página se pierde y no se envía nada a almacenamiento persistente.
+ */
+
 import { Check, Copy, History, Trash2 } from 'lucide-react'
 import { HASH_LABELS } from '../lib/tools'
 import { buttonSecondary, panel } from '../lib/ui'
 
+/**
+ * Formatea la marca de tiempo ISO en una hora local legible.
+ *
+ * @param {string} timestamp Fecha ISO generada al crear la entrada.
+ * @returns {string} Hora en formato HH:MM:SS.
+ */
 function formatTime(timestamp) {
   return new Date(timestamp).toLocaleTimeString('es-ES', {
     hour: '2-digit',
@@ -10,6 +24,15 @@ function formatTime(timestamp) {
   })
 }
 
+/**
+ * @param {{
+ *   algorithm: 'sha256' | 'sha512',
+ *   entries: Array<{ id: string, text: string, result: string, timestamp: string }>,
+ *   copiedKey: string | null,
+ *   onCopy: (value: string, key: string) => void,
+ *   onClear: () => void,
+ * }} props
+ */
 export default function HistoryPanel({
   algorithm,
   entries,
@@ -37,6 +60,8 @@ export default function HistoryPanel({
           </div>
         </div>
 
+        {/* El botón se deshabilita cuando no hay nada que borrar. Solo afecta
+            al historial del algoritmo activo. */}
         <button
           type="button"
           onClick={onClear}
@@ -50,6 +75,7 @@ export default function HistoryPanel({
 
       <div className="px-5 py-4">
         {entries.length === 0 ? (
+          // Estado vacío con una explicación breve de cómo llenar la lista.
           <div className="flex min-h-32 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-line bg-white/60 px-6 py-8 text-center">
             <History className="size-7 text-steel" aria-hidden="true" />
             <p className="text-sm font-medium text-navy">
@@ -60,6 +86,7 @@ export default function HistoryPanel({
             </p>
           </div>
         ) : (
+          // Las entradas llegan con la más reciente primero desde App.
           <ul className="scrollbar-thin max-h-[32rem] space-y-3 overflow-y-auto pr-1">
             {entries.map((entry) => {
               const copied = copiedKey === entry.id
@@ -79,6 +106,8 @@ export default function HistoryPanel({
                       </p>
                     </div>
 
+                    {/* El id de la entrada permite que solo este botón muestre
+                        "Copiado" mientras el feedback está activo. */}
                     <button
                       type="button"
                       onClick={() => onCopy(entry.result, entry.id)}
@@ -98,6 +127,8 @@ export default function HistoryPanel({
                     </button>
                   </div>
 
+                  {/* break-all evita que un hash de 128 caracteres desborde
+                      la tarjeta en pantallas estrechas. */}
                   <div className="mt-3 rounded-lg border border-line bg-cream/60 p-3">
                     <p className="break-all font-mono text-[11px] leading-relaxed text-navy">
                       {entry.result}

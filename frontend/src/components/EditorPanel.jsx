@@ -1,3 +1,11 @@
+/**
+ * Panel de entrada de texto.
+ *
+ * Adapta el placeholder y los botones según la herramienta seleccionada:
+ * Atbash muestra Cifrar/Descifrar y los hashes muestran Generar hash. También
+ * aplica el límite de longitud y el atajo Ctrl/Cmd+Enter.
+ */
+
 import {
   Eraser,
   FileText,
@@ -14,8 +22,23 @@ import {
   panel,
 } from '../lib/ui'
 
+// Debe coincidir con MAX_TEXT_LENGTH del backend para que el textarea y la
+// validación del servidor rechacen los mismos textos demasiado largos.
 const MAX_LENGTH = 100000
 
+/**
+ * @param {{
+ *   tool: object,
+ *   text: string,
+ *   onTextChange: (value: string) => void,
+ *   onClear: () => void,
+ *   onSample: () => void,
+ *   onEncrypt: () => void,
+ *   onDecrypt: () => void,
+ *   onHash: () => void,
+ *   loading: boolean,
+ * }} props
+ */
 export default function EditorPanel({
   tool,
   text,
@@ -29,8 +52,15 @@ export default function EditorPanel({
 }) {
   const isCipher = tool.kind === 'cipher'
   const isEmpty = text.length === 0
+  // Evita enviar solicitudes duplicadas y acciones sobre un editor vacío.
   const disabled = loading || isEmpty
 
+  /**
+   * Ejecuta la acción principal con Ctrl+Enter (Windows/Linux) o Cmd+Enter
+   * (macOS). En Atbash se cifra; en herramientas de hash se genera el hash.
+   *
+   * @param {React.KeyboardEvent<HTMLTextAreaElement>} event
+   */
   const handleKeyDown = (event) => {
     if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
       event.preventDefault()
@@ -59,6 +89,7 @@ export default function EditorPanel({
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Los botones auxiliares no envían datos: solo preparan el editor. */}
           <button
             type="button"
             onClick={onSample}
@@ -80,6 +111,8 @@ export default function EditorPanel({
       </header>
 
       <div className="px-5 py-4">
+        {/* La etiqueta es visualmente oculta porque el título del panel ya
+            describe el campo, pero sigue asociada para lectores de pantalla. */}
         <label htmlFor="texto-entrada" className="sr-only">
           Texto de entrada
         </label>
@@ -103,6 +136,8 @@ export default function EditorPanel({
       <footer className="flex flex-col-reverse gap-2 border-t border-line px-5 py-4 sm:flex-row sm:justify-end">
         {isCipher ? (
           <>
+            {/* Atbash es simétrico: ambos botones llaman al mismo endpoint,
+                pero el modo permite describir la acción en el resultado. */}
             <button
               type="button"
               onClick={onDecrypt}

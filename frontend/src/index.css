@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens de Tailwind v4.
+ * Las variables de color generan utilidades como bg-cream, text-navy o
+ * border-line; las sombras generan shadow-soft. Cualquier token que no se
+ * use en los componentes debe eliminarse para evitar CSS y documentación
+ * innecesarios.
+ */
 @theme {
   --font-sans:
     "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
@@ -10,33 +17,27 @@
     ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
     "Liberation Mono", monospace;
 
+  /* Colores base: fondos cálidos, texto azul marino y acento índigo. */
   --color-navy: #14213d;
-  --color-navy-soft: #223354;
   --color-steel: #64748b;
   --color-cream: #f7f3ea;
   --color-cream-light: #fffdf9;
   --color-ink: #1f2937;
   --color-muted: #667085;
-  --color-muted-soft: #7a8394;
   --color-line: #e7e1d6;
   --color-accent: #4f46e5;
   --color-accent-soft: #eef2ff;
   --color-accent-deep: #4338ca;
+
+  /* Colores semánticos para estados de éxito y error. */
   --color-success: #3f9d72;
   --color-success-deep: #277454;
   --color-terracotta: #b45141;
   --color-ochre: #b08a4f;
 
+  /* Sombra suave usada por paneles, botones y tarjetas seleccionadas. */
   --shadow-soft:
     0 1px 2px rgba(20, 33, 61, 0.04), 0 10px 30px rgba(20, 33, 61, 0.06);
-  --shadow-card:
-    0 1px 3px rgba(20, 33, 61, 0.05), 0 18px 40px rgba(20, 33, 61, 0.07);
-  --shadow-retro:
-    0 1px 2px rgba(20, 33, 61, 0.04), 0 10px 30px rgba(20, 33, 61, 0.06);
-  --shadow-retro-sm:
-    0 1px 2px rgba(20, 33, 61, 0.05), 0 6px 18px rgba(20, 33, 61, 0.05);
-  --shadow-retro-navy:
-    0 1px 3px rgba(20, 33, 61, 0.05), 0 18px 40px rgba(20, 33, 61, 0.07);
 }
 
 @layer base {
@@ -54,6 +55,7 @@
     text-rendering: optimizeLegibility;
   }
 
+  /* Selección de texto con el mismo acento índigo de la interfaz. */
   ::selection {
     background-color: rgba(79, 70, 229, 0.2);
     color: #14213d;
@@ -61,12 +63,18 @@
 }
 
 @layer utilities {
+  /* Barra de desplazamiento discreta para textareas y listas largas. */
   .scrollbar-thin {
     scrollbar-width: thin;
     scrollbar-color: #c7c2b8 transparent;
   }
 }
 
+/*
+ * Respeta la preferencia del sistema de reducir movimiento. Las animaciones
+ * se mantienen casi instantáneas para no eliminar por completo los cambios de
+ * estado, pero se evita el desplazamiento y las transiciones largas.
+ */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

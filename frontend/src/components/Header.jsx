@@ -1,5 +1,14 @@
+/**
+ * Cabecera principal de la aplicación.
+ *
+ * Muestra la marca y un indicador del estado de la API. Recibe `apiStatus`
+ * desde App para no duplicar la lógica de comprobación de salud.
+ */
+
 import { ShieldCheck } from 'lucide-react'
 
+// Cada estado define el texto, el color del punto y los estilos del pill.
+// Así el JSX solo necesita resolver una entrada y no cadenas de condicionales.
 const STATUS = {
   checking: {
     label: 'Comprobando API…',
@@ -24,7 +33,11 @@ const STATUS = {
   },
 }
 
+/**
+ * @param {{ apiStatus: 'checking' | 'online' | 'offline' }} props
+ */
 export default function Header({ apiStatus }) {
+  // Si llega un estado inesperado, se usa "checking" como fallback seguro.
   const status = STATUS[apiStatus] ?? STATUS.checking
 
   return (
@@ -44,6 +57,8 @@ export default function Header({ apiStatus }) {
           </div>
         </div>
 
+        {/* role="status" + aria-live anuncian los cambios de conexión a
+            lectores de pantalla sin interrumpir la interacción. */}
         <span
           role="status"
           aria-live="polite"
