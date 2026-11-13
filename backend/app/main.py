@@ -8,16 +8,23 @@ está disponible.
 
 from __future__ import annotations
 
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.routers import crypto
 
-# Orígenes permitidos durante el desarrollo local. Vite sirve el frontend en
-# el puerto 5173 y puede hacerlo tanto con localhost como con 127.0.0.1.
+# Orígenes permitidos. En producción se define CORS_ORIGINS con las URLs del
+# frontend separadas por comas (por ejemplo, el dominio de Netlify). Si no se
+# define, se conservan los orígenes del servidor de desarrollo de Vite.
 ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
+    origin.strip()
+    for origin in os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:5173,http://127.0.0.1:5173",
+    ).split(",")
+    if origin.strip()
 ]
 
 # La documentación interactiva se genera automáticamente en /docs.

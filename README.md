@@ -104,6 +104,43 @@ npm run lint
 npm run build
 ```
 
+## Despliegue
+
+El repositorio incluye la configuración para desplegar el frontend en **Netlify** y el backend en **Render** mediante auto-deploy desde GitHub.
+
+### Backend en Render
+
+`render.yaml` define el servicio `cifralab-api` (plan Free) con:
+
+- Directorio: `backend`
+- Build: `pip install -r requirements.txt`
+- Start: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- Health check: `/api/health`
+- Python fijado en `backend/.python-version`
+
+Pasos:
+
+1. En Render, elige **New > Blueprint** y conecta el repositorio.
+2. Cuando tengas la URL del frontend, define la variable `CORS_ORIGINS` con ese dominio (por ejemplo `https://tu-sitio.netlify.app`) y redeploya.
+
+### Frontend en Netlify
+
+`netlify.toml` configura el build:
+
+- Base: `frontend`
+- Build: `npm run build`
+- Publish: `dist`
+- Node: `22`
+- Redirección SPA a `/index.html`
+
+Pasos:
+
+1. En Netlify, importa el repositorio y deja que detecte `netlify.toml`.
+2. Añade la variable de build `VITE_API_URL` con la URL del backend en Render (por ejemplo `https://cifralab-api.onrender.com`).
+3. Despliega y verifica que el indicador de la cabecera muestre la API en línea.
+
+> El plan Free de Render suspende el servicio por inactividad: la primera petición puede tardar unos segundos en responder.
+
 ## Notas de diseño
 
 - **Atbash es simétrico:** cifrar y descifrar aplican la misma sustitución. Trabaja con 26 letras (`A-Z`, sin `Ñ`), convierte la entrada a mayúsculas y rechaza espacios, números, signos y acentos.
