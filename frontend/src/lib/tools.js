@@ -27,7 +27,7 @@ export const TOOLS = [
     algorithm: 'sha256',
     bits: 256,
     placeholder: 'Escribe solo letras, sin espacios ni acentos…',
-    sample: 'LaPrivacidadEsUnDerecho',
+    sample: 'LAPRIVACIDADESUNDERECHO',
   },
   {
     // SHA-512 duplica la longitud del digest y se identifica por su algoritmo.
@@ -39,7 +39,7 @@ export const TOOLS = [
     algorithm: 'sha512',
     bits: 512,
     placeholder: 'Escribe solo letras, sin espacios ni acentos…',
-    sample: 'LaPrivacidadEsUnDerecho',
+    sample: 'LAPRIVACIDADESUNDERECHO',
   },
 ]
 

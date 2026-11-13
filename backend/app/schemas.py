@@ -22,8 +22,7 @@ AtbashMode = Literal["encrypt", "decrypt"]
 
 # Atbash y los hashes solo aceptan letras ASCII. Se excluyen Ñ, vocales
 # acentuadas, espacios, números y signos.
-_ATBASH_PATTERN = re.compile(r"^[A-Za-z]+$")
-_HASH_TEXT_PATTERN = re.compile(r"^[A-Za-z]+$")
+_LETTERS_PATTERN = re.compile(r"^[A-Za-z]+$")
 
 # Mensaje compartido por todos los validadores de texto.
 _LETTERS_ONLY_ERROR = (
@@ -50,7 +49,7 @@ class AtbashRequest(BaseModel):
     @classmethod
     def validate_atbash_text(cls, value: str) -> str:
         """Rechaza caracteres fuera de A-Z y normaliza a mayúsculas."""
-        if not _ATBASH_PATTERN.fullmatch(value):
+        if not _LETTERS_PATTERN.fullmatch(value):
             raise ValueError(_LETTERS_ONLY_ERROR)
         return value.upper()
 
@@ -70,10 +69,10 @@ class HashRequest(BaseModel):
     @field_validator("text")
     @classmethod
     def validate_hash_text(cls, value: str) -> str:
-        """Impide hashear textos con caracteres no permitidos."""
-        if not _HASH_TEXT_PATTERN.fullmatch(value):
+        """Rechaza caracteres no permitidos y normaliza a mayúsculas."""
+        if not _LETTERS_PATTERN.fullmatch(value):
             raise ValueError(_LETTERS_ONLY_ERROR)
-        return value
+        return value.upper()
 
 
 class HashResponse(BaseModel):

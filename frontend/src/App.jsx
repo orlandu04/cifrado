@@ -108,7 +108,7 @@ export default function App() {
 
     setToolId(nextToolId)
 
-    // Al pasar de un hash a Atbash (o viceversa) se aplica el saneamiento
+    // Atbash y los hashes normalizan a mayúsculas; se aplica el saneamiento
     // correspondiente para que el texto siga siendo válido.
     if (nextTool.kind === 'cipher') {
       setText((previous) => sanitizeAtbash(previous))

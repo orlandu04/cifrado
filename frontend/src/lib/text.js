@@ -26,12 +26,12 @@ export function sanitizeAtbash(value) {
 }
 
 /**
- * Sanea el texto para hashing. Se conserva la capitalización original porque
- * mayúsculas y minúsculas producen hashes distintos.
+ * Sanea el texto para hashing. Igual que Atbash, normaliza a mayúsculas para
+ * que minúsculas y mayúsculas produzcan el mismo hash.
  *
  * @param {string} value Texto escrito por el usuario.
- * @returns {string} Texto con solo letras A-Z/a-z.
+ * @returns {string} Texto con solo letras A-Z en mayúsculas.
  */
 export function sanitizeHashText(value) {
-  return value.replace(NON_LETTERS, '')
+  return value.replace(NON_LETTERS, '').toUpperCase()
 }

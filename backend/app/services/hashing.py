@@ -1,8 +1,9 @@
 """Funciones de hashing SHA-256 y SHA-512.
 
 Se usa ``hashlib`` de la biblioteca estándar para evitar implementaciones
-propias de criptografía. El texto se codifica siempre en UTF-8, aunque los
-schemas limitan la entrada a letras ASCII.
+propias de criptografía. El texto se normaliza a mayúsculas y se codifica
+siempre en UTF-8, aunque los schemas limitan la entrada a letras ASCII. El
+digest se devuelve en hexadecimal con letras mayúsculas (A-F).
 """
 
 from __future__ import annotations
@@ -31,11 +32,15 @@ def _build_hash(algorithm: str):
 
 
 def generate_hash(text: str, algorithm: str) -> str:
-    """Calcula el hash hexadecimal de ``text`` con el algoritmo indicado."""
+    """Calcula el hash hexadecimal de ``text`` con el algoritmo indicado.
+
+    El texto se normaliza a mayúsculas para que ``"abc"`` y ``"ABC"`` produzcan
+    el mismo digest, y el resultado se devuelve en hexadecimal mayúsculo.
+    """
     digest = _build_hash(algorithm)
     # UTF-8 convierte el texto en una secuencia de bytes estable y reproducible.
-    digest.update(text.encode("utf-8"))
-    return digest.hexdigest()
+    digest.update(text.upper().encode("utf-8"))
+    return digest.hexdigest().upper()
 
 
 def hash_bits(algorithm: str) -> int:
